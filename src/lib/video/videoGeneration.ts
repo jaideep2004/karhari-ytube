@@ -19,6 +19,8 @@ const DEVANAGARI_FONTS = [
   '/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf',
   '/usr/share/fonts/opentype/noto/NotoSansDevanagari-Regular.otf',
   '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
+  '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+  '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
 ].filter(Boolean) as string[];
 
 const DEVANAGARI_FONT_NAMES = [
