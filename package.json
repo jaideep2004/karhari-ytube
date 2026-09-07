@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "echo tests ok",
     "typecheck": "tsc --noEmit",
-    "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs"
+    "seed:admin": "node --env-file=.env scripts/seed-admin.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1120.0",
