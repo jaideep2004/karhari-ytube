@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Sparkles,
@@ -14,10 +15,17 @@ import {
   Award,
 } from "lucide-react";
 
-export const metadata = {
-  title: "About Us — Karhari Media",
+export const metadata: Metadata = {
+  title: "About Us",
   description:
     "Karhari Media builds simple tools for creators. Karhari Tube turns any MP3, WAV or FLAC into a YouTube or Facebook video in seconds — no editing needed.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About Karhari Tube",
+    description:
+      "Karhari Media tools for creators. Turn audio + cover into 1080p video for YouTube and Facebook.",
+    url: "/about",
+  },
 };
 
 export default function AboutPage() {

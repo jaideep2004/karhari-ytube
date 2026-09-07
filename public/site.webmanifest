@@ -1,0 +1,12 @@
+{
+  "name": "Karhari Tube",
+  "short_name": "Karhari Tube",
+  "description": "Upload MP3 to YouTube and Facebook with audio visualizer video",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#f8f9fa",
+  "icons": [
+    { "src": "/kfavicon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

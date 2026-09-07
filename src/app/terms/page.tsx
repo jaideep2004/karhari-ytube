@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Terms & Conditions — Karhari Media",
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
   description:
     "Terms that govern your use of Karhari Media and Karhari Tube — eligibility, content rules, YouTube/Facebook compliance, IP, disclaimers and liability.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "Terms & Conditions — Karhari Tube",
+    description: "Eligibility, content rules, YouTube/Facebook compliance, IP, disclaimers.",
+    url: "/terms",
+  },
 };
 
 const updated = "September 2, 2026";

@@ -1,28 +1,44 @@
 import Link from "next/link";
 
+const FOOTER_LINKS = [
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/login", label: "Login" },
+];
+
 export function Footer() {
   return (
-    <footer className="w-full border-t border-zinc-200/80 bg-[#f8f9fa] py-8 text-zinc-600">
+    <footer className="w-full border-t border-zinc-200/80 bg-[#f8f9fa] py-10 text-zinc-600">
       <div className="mx-auto max-w-[1140px] px-4 sm:px-6 xl:px-12">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="text-center text-[15px] text-zinc-500 md:text-left">
-            <span>
-              &copy; 2026 &nbsp;&middot;&nbsp;{" "}
-              <Link href="/terms" className="text-zinc-600 underline hover:text-black">
-                Terms &amp; Conditions
-              </Link>{" "}
-              |{" "}
-              <Link href="/privacy" className="text-zinc-600 underline hover:text-black">
-                Privacy Policy
-              </Link>
-            </span>
+        <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[15px] text-zinc-600">
+            {FOOTER_LINKS.map((l, i) => (
+              <span key={l.href} className="flex items-center gap-5">
+                <Link
+                  href={l.href}
+                  className="text-zinc-600 underline-offset-2 hover:text-black hover:underline"
+                >
+                  {l.label}
+                </Link>
+                {i < FOOTER_LINKS.length - 1 && (
+                  <span className="text-zinc-300" aria-hidden>
+                    |
+                  </span>
+                )}
+              </span>
+            ))}
           </div>
-          <div className="flex justify-center md:justify-end">
+          <div className="flex flex-col items-start gap-1 md:items-end">
+            <div className="text-[14px] text-zinc-500">
+              &copy; {new Date().getFullYear()} Karhari Media
+            </div>
             <img
               id="developedByYouTube"
               src="/images/developed-with-youtube-dark-lowercase.svg"
               alt="developed with YouTube"
-              className="h-auto w-[240px] sm:w-[280px] md:w-[300px]"
+              className="h-auto w-[200px] sm:w-[240px] md:w-[280px]"
             />
           </div>
         </div>

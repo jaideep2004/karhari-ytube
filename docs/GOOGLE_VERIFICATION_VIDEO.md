@@ -27,7 +27,7 @@
 ## 2) Script — read this while recording
 
 ### 0:00 — Intro (homepage)
-> "This is Karhari Tube by Karhari Media — https://client-livedomain.com — a tool that turns any audio file and cover image into a 1080p video and uploads it to the user's own YouTube channel."
+> "This is Karhari Tube by Karhari Media — https://karharimedia.org — a tool that turns any audio file and cover image into a 1080p video and uploads it to the user's own YouTube channel."
 
 - Show homepage, Karhari Media logo. Scroll to footer → click **Privacy** → show page live → back → click **Terms**.
 

@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Privacy Policy — Karhari Media",
+export const metadata: Metadata = {
+  title: "Privacy Policy",
   description:
     "How Karhari Media (Karhari Tube) collects, uses and protects your data when you turn audio into video for YouTube and Facebook.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "Privacy Policy — Karhari Tube",
+    description: "How Karhari Media collects, uses and protects your data.",
+    url: "/privacy",
+  },
 };
 
 const updated = "September 2, 2026";
