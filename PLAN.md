@@ -14,7 +14,7 @@
 - [ ] Verify `npm run build` + `npx tsc --noEmit` green
 - **Exit gate:** `PLAN.md` reviewed, project name locked, hosting decision (single Render Docker vs Vercel+worker).
 
-## Phase 1 — Auth + Storage (3 days)
+## Phase 1 — Auth + Storage (3 days)..................
 - Auth.js v5: Google (youtube.upload + readonly) + Facebook (pages_*), JWT session, linking by email/providerAccountId.
 - User model + encrypted token vault (reuse `dspCredentialVault` AES pattern).
 - R2 provider (`r2Provider.ts` copy) — audio/artwork upload via presigned URL or server proxy.
