@@ -2,7 +2,7 @@ import { ObjectId, Db } from "mongodb";
 import { getDb } from "./mongo";
 
 export type VideoJobStatus = "queued" | "downloading" | "generating" | "uploading" | "done" | "failed";
-export type VideoPreset = "bars" | "circular" | "wave" | "spectrum" | "pulse";
+export type VideoPreset = "bars" | "circular" | "wave" | "pulse";
 export type VideoColor = "cyan" | "green" | "pink" | "purple" | "red" | "white";
 
 export type VideoJobDoc = {

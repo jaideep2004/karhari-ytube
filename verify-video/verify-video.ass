@@ -1,0 +1,37 @@
+[Script Info]
+Title: Karhari Tube OAuth Verification Captions
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 1
+ScaledBorderAndShadow: yes
+YCbCr Matrix: TV.709
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,52,&H00FFFFFF,&H000000FF,&H00000000,&HCC000000,0,0,0,0,100,100,0,0,1,2.5,1,2,80,80,55,1
+Style: Emphasis,Arial,52,&H00FFFFFF,&H000000FF,&H001A4D8F,&HCC000000,1,0,0,0,100,100,0,0,1,2.5,1,2,80,80,55,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:08.00,Default,,0,0,0,,Welcome to this demonstration of Karhari Tube\Nfor Google OAuth verification. We will begin\Nfrom a signed-out state.
+Dialogue: 0,0:00:08.00,0:00:24.00,Default,,0,0,0,,Karhari Tube allows creators, musicians, and\Npodcasters to convert audio tracks into branded\Nvideos and publish them directly to YouTube.
+Dialogue: 0,0:00:25.00,0:00:35.00,Default,,0,0,0,,Here on our About page, we explain the service\Narchitecture, company information, and our\Ndedicated tools for creators.
+Dialogue: 0,0:00:36.00,0:00:42.00,Default,,0,0,0,,Our Terms of Service outline platform\Ncompliance, user ownership of content, and\Nadherence to YouTube API Services Terms of\NService.
+Dialogue: 0,0:00:43.00,0:00:54.00,Default,,0,0,0,,Our Privacy Policy details how user data and\NOAuth tokens are stored securely using AES-256\Nencryption, strictly used for requested video\Npublishing, and never sold or shared.
+Dialogue: 0,0:00:55.00,0:01:01.00,Default,,0,0,0,,Now, we initiate the sign-in flow by clicking\NContinue with Google.
+Dialogue: 0,0:01:02.00,0:01:13.00,Default,,0,0,0,,Notice in the address bar that our registered\NOAuth Client ID is clearly visible. We select\Nour Google account to proceed.
+Dialogue: 0,0:01:14.00,0:01:25.00,Default,,0,0,0,,Proceeding through the consent screen to sign in\Nto Karhari Tube.
+Dialogue: 0,0:01:26.00,0:01:43.00,Default,,0,0,0,,Here is the Google OAuth consent screen. Karhari\NTube requests access to manage YouTube videos,\Nview the YouTube account, and manage account\Nuploads. These permissions are strictly required\Nto upload generated videos directly to the\Nuser's YouTube channel on their behalf.
+Dialogue: 0,0:01:44.00,0:01:59.00,Default,,0,0,0,,Once authenticated, the user is directed to the\Ncreation dashboard. First, we select an audio\Nfile to upload.
+Dialogue: 0,0:01:59.00,0:02:13.00,Default,,0,0,0,,Next, we select a background artwork image for\Nthe video.
+Dialogue: 0,0:02:14.00,0:02:29.00,Default,,0,0,0,,We set the title, artist name, choose a\Ncustomized audio wave visualizer, confirm our\Nconnected YouTube account destination, and enter\Nthe video description.
+Dialogue: 0,0:02:30.00,0:03:02.00,Default,,0,0,0,,The assets are uploaded securely to our\Nprocessing queue.
+Dialogue: 0,0:03:03.00,0:03:36.00,Default,,0,0,0,,We click Create Video. The backend starts\Ndownloading assets and rendering the\Naudio-reactive visualizer video.
+Dialogue: 0,0:03:37.00,0:05:01.00,Default,,0,0,0,,The video generation pipeline combines the\Nhigh-quality audio track with the background\Nartwork and synchronized visualizer.
+Dialogue: 0,0:05:02.00,0:05:35.00,Default,,0,0,0,,With the video rendered, Karhari Tube now uses\Nthe YouTube Data API youtube dot upload scope to\Npublish the video directly to the user's\Nconnected YouTube channel.
+Dialogue: 0,0:05:36.00,0:05:43.00,Default,,0,0,0,,Upload is complete. We click Open job to inspect\Nthe finished task.
+Dialogue: 0,0:05:44.00,0:05:57.00,Default,,0,0,0,,On the job details page, we can preview the\Ngenerated video and see the delivery\Nconfirmation to YouTube with the video link.
+Dialogue: 0,0:05:58.00,0:06:24.00,Default,,0,0,0,,Opening the YouTube link verifies that the video\Nwas successfully created and uploaded to the\Nuser's channel.
+Dialogue: 0,0:06:25.00,0:06:50.00,Default,,0,0,0,,The video has completed YouTube processing. We\Nplay the video, demonstrating seamless playback\Nof the audio, artwork, and synchronized\Nfrequency visualizer on YouTube.
+Dialogue: 0,0:06:51.00,0:07:05.00,Default,,0,0,0,,Finally, returning to the dashboard jobs list\Nshows the complete upload log and status. This\Nconcludes the demonstration.

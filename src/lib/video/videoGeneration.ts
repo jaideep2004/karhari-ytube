@@ -299,10 +299,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
     // NCS-style background: blurred artwork with subtle blue tint fills full frame,
     // sharp artwork scaled to a polished centered size (~540px).
     // When no artwork, use a rich dark gradient (deep navy → dark purple).
-    const hasText = !!input.title || !!input.artist;
+    const hasText = !!input.title;
     const escTxt = (s: string) => s.replace(/'/g, "'\\''").replace(/:/g, '\\:');
     const titleTxt = input.title ? escTxt(input.title) : '';
-    const artistTxt = input.artist ? escTxt(input.artist) : '';
 
     // Background: when artwork exists, use the full image filling the frame (no blur)
     // Previous blurred + centered art is removed per user request; now the artwork
@@ -345,14 +344,11 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
           `[${overlayTarget}][circle]overlay=${overlayX}:${overlayY},format=yuv420p[comp]`;
         if (hasText) {
           fc += `;[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1]`;
-          if (input.artist) {
-            fc += `;[vid1]drawtext=text='${escapeDrawtext(artistTxt)}':x=(w-text_w)/2:y=102:fontsize=20:fontcolor=White@0.75:shadowy=2:shadowcolor=black@0.6:${FONT_SPEC}[vid]`;
-          }
         }
         // Passthrough audio (no visual audio processing needed — circle is pre-rendered)
         fc += ';[0:a]anull[a_out]';
         filterComplex = fc;
-        filterOutputs = [hasText && input.artist ? 'vid' : (hasText ? 'vid1' : 'comp'), 'a_out'];
+        filterOutputs = [hasText ? 'vid1' : 'comp', 'a_out'];
         break;
       }
 
@@ -365,12 +361,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
         fc += '[bg][waves]overlay=0:1080-380,format=yuv420p[comp];';
         if (hasText) {
           fc += `[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1];`;
-          if (input.artist) {
-            fc += `[vid1]drawtext=text='${escapeDrawtext(artistTxt)}':x=(w-text_w)/2:y=102:fontsize=20:fontcolor=White@0.75:shadowy=2:shadowcolor=black@0.6:${FONT_SPEC}[vid]`;
-          }
         }
         filterComplex = fc;
-        filterOutputs = [hasText && input.artist ? 'vid' : (hasText ? 'vid1' : 'comp'), 'a_out'];
+        filterOutputs = [hasText ? 'vid1' : 'comp', 'a_out'];
         break;
       }
 
@@ -382,24 +375,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
         fc += '[bg][waves]overlay=0:1080-380,format=yuv420p[comp];';
         if (hasText) {
           fc += `[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1];`;
-          if (input.artist) fc += `[vid1]drawtext=text='${escapeDrawtext(artistTxt)}':x=(w-text_w)/2:y=102:fontsize=20:fontcolor=White@0.75:shadowy=2:shadowcolor=black@0.6:${FONT_SPEC}[vid]`;
         }
         filterComplex = fc;
-        filterOutputs = [hasText && input.artist ? 'vid' : (hasText ? 'vid1' : 'comp'), 'a_out'];
-        break;
-      }
-
-      // ── spectrum (frequency spectrum) ───────────────────────────────
-      case 'spectrum': {
-        let fc = bgChain + ';[0:a]asplit[a_spec][a_out];' +
-          '[a_spec]showspectrum=s=1920x380:mode=combined:color=intensity:scale=log:win_func=hann:overlap=1[spec];';
-        fc += '[bg][spec]overlay=0:1080-380,format=yuv420p[comp];';
-        if (hasText) {
-          fc += `[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1];`;
-          if (input.artist) fc += `[vid1]drawtext=text='${escapeDrawtext(artistTxt)}':x=(w-text_w)/2:y=102:fontsize=20:fontcolor=White@0.75:shadowy=2:shadowcolor=black@0.6:${FONT_SPEC}[vid]`;
-        }
-        filterComplex = fc;
-        filterOutputs = [hasText && input.artist ? 'vid' : (hasText ? 'vid1' : 'comp'), 'a_out'];
+        filterOutputs = [hasText ? 'vid1' : 'comp', 'a_out'];
         break;
       }
 
@@ -411,10 +389,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
         fc += '[bg][waves]overlay=0:1080-380,format=yuv420p[comp];';
         if (hasText) {
           fc += `[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1];`;
-          if (input.artist) fc += `[vid1]drawtext=text='${escapeDrawtext(artistTxt)}':x=(w-text_w)/2:y=102:fontsize=20:fontcolor=White@0.75:shadowy=2:shadowcolor=black@0.6:${FONT_SPEC}[vid]`;
         }
         filterComplex = fc;
-        filterOutputs = [hasText && input.artist ? 'vid' : (hasText ? 'vid1' : 'comp'), 'a_out'];
+        filterOutputs = [hasText ? 'vid1' : 'comp', 'a_out'];
         break;
       }
     }
@@ -574,7 +551,7 @@ export async function generateTrackVideo(
       audioPath,
       artworkPath,
       title,
-      artist,
+      artist: '',
       preset,
       outputPath,
       hasArtwork,
@@ -634,7 +611,7 @@ export async function generateAlbumVideo(
       audioPath: concatedAudio,
       artworkPath,
       title: albumTitle,
-      artist,
+      artist: '',
       preset,
       color,
       outputPath,

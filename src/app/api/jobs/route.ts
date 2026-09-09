@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   if (!audioR2Key || typeof audioR2Key !== "string") return Response.json({ error: "audioR2Key required" }, { status: 400 });
   if (!title || typeof title !== "string" || !title.trim()) return Response.json({ error: "title required" }, { status: 400 });
 
-  const allowed = ["bars","circular","wave","spectrum","pulse"] as const;
+  const allowed = ["bars","circular","wave","pulse"] as const;
   const p = (typeof preset === "string" && (allowed as readonly string[]).includes(preset) ? preset : "bars") as typeof allowed[number];
   const c = typeof color === "string" ? color : "cyan";
   const v = visibility === "unlisted" || visibility === "private" ? visibility : "public";

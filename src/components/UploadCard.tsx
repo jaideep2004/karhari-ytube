@@ -22,8 +22,7 @@ export function UploadCard() {
   const [generateFromTitle, setGenerateFromTitle] = useState(false);
 
   const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
-  const [preset, setPreset] = useState<"bars" | "circular" | "wave" | "spectrum" | "pulse">("bars");
+  const [preset, setPreset] = useState<"bars" | "circular" | "wave" | "pulse">("bars");
   const [color, setColor] = useState("cyan");
 
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -231,7 +230,7 @@ export function UploadCard() {
           audioR2Key: audioMeta.r2Key,
           artworkR2Key: artworkMeta?.r2Key || null,
           title: title.trim(),
-          artist: artist.trim(),
+          artist: "",
           preset,
           color,
           visibility,
@@ -327,41 +326,76 @@ export function UploadCard() {
         ctx.closePath();
         ctx.fillStyle = hex + "18";
         ctx.fill();
-      } else if (preset === "spectrum") {
-        const barCount = 16;
-        const barWidth = 120 / barCount - 1;
-        for (let i = 0; i < barCount; i++) {
-          // spectrum = mirrored from center
-          const dist = Math.abs(i - barCount / 2) / (barCount / 2);
-          const height = (Math.sin(i * 1.1 + t / 7) * 0.5 + 0.5) * (22 - dist * 10) + 6;
-          const y = 68 - height;
-          ctx.fillRect(i * (barWidth + 1), y, barWidth, height);
-        }
       } else if (preset === "pulse") {
         const cx = 60, cy = 34;
-        const pulse = (Math.sin(t / 12) * 0.5 + 0.5);
-        const r1 = 10 + pulse * 16;
-        const r2 = 6 + pulse * 8;
-        ctx.globalAlpha = 0.18;
+
+        // Central glowing core — smooth pulsing radius
+        const corePulse = Math.sin(t / 14) * 0.5 + 0.5; // 0..1
+        const coreR = 8 + corePulse * 4;
+
+        // Outer halo — counter-phase to core, soft glow
+        const haloPulse = Math.sin(t / 18 + Math.PI) * 0.5 + 0.5;
+        const haloR = coreR + 8 + haloPulse * 6;
+
+        // Glow trail
+        const grad = ctx.createRadialGradient(cx, cy, coreR * 0.5, cx, cy, haloR);
+        grad.addColorStop(0, hex);
+        grad.addColorStop(0.4, hex + "55");
+        grad.addColorStop(1, hex + "00");
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(cx, cy, r1, 0, Math.PI * 2);
-        ctx.fillStyle = hex;
+        ctx.arc(cx, cy, haloR, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = 0.45;
+
+        // Solid core
+        ctx.fillStyle = hex;
         ctx.beginPath();
-        ctx.arc(cx, cy, r2, 0, Math.PI * 2);
-        ctx.fillStyle = hex;
+        ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = 1;
-        // orbiting dots
-        for (let i = 0; i < 3; i++) {
-          const ang = (t / 18) + (i * Math.PI * 2) / 3;
-          const rr = r1 + 6;
+
+        // Equalizer-style 8 bars radiating outward, each independently animated
+        // Looks like audio react + ring, much more dynamic
+        const barCount = 8;
+        for (let i = 0; i < barCount; i++) {
+          const ang = (i / barCount) * Math.PI * 2 + t / 90;
+          // Each bar has its own beat — combination of slow LFO + fast wobble
+          const barPulse =
+            (Math.sin(i * 1.3 + t / 8) * 0.5 + 0.5) * 0.6 +
+            (Math.sin(i * 2.7 + t / 4) * 0.5 + 0.5) * 0.4; // 0..1
+          const barLen = 6 + barPulse * 14;
+          const x1 = cx + Math.cos(ang) * (coreR + 4);
+          const y1 = cy + Math.sin(ang) * (coreR + 4);
+          const x2 = cx + Math.cos(ang) * (coreR + 4 + barLen);
+          const y2 = cy + Math.sin(ang) * (coreR + 4 + barLen);
+
+          ctx.strokeStyle = hex;
+          ctx.globalAlpha = 0.55 + barPulse * 0.45;
+          ctx.lineWidth = 1.6 + barPulse * 1.4;
+          ctx.lineCap = "round";
           ctx.beginPath();
-          ctx.arc(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr, 2, 0, Math.PI * 2);
-          ctx.fillStyle = hex;
-          ctx.fill();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
         }
+        ctx.globalAlpha = 1;
+
+        // 3 orbiting particles, opposite direction, with trail
+        for (let i = 0; i < 3; i++) {
+          const baseAng = -(t / 22) + (i * Math.PI * 2) / 3;
+          const orbitR = haloR + 4;
+          for (let k = 6; k >= 0; k--) {
+            const trailT = k / 6;
+            const a = baseAng - trailT * 0.18;
+            const x = cx + Math.cos(a) * orbitR;
+            const y = cy + Math.sin(a) * orbitR;
+            ctx.globalAlpha = (1 - trailT) * 0.85;
+            ctx.fillStyle = hex;
+            ctx.beginPath();
+            ctx.arc(x, y, 1.2 + (1 - trailT) * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = 1;
       }
 
       rafRef.current = requestAnimationFrame(draw);
@@ -461,29 +495,23 @@ export function UploadCard() {
           )}
         </div>
 
-        {/* Title/Artist */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium">Title *</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="My Song" className="mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-zinc-300" />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Artist</label>
-            <input value={artist} onChange={(e) => setArtist(e.target.value)} placeholder="Karhari" className="mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-zinc-300" />
-          </div>
+        {/* Title */}
+        <div>
+          <label className="text-sm font-medium">Title *</label>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="My Song" className="mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-zinc-300" />
         </div>
 
         {/* Visualizer */}
         <div>
           <div className="text-sm font-medium">④ Visualizer</div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-            {(["bars", "circular", "wave", "spectrum", "pulse"] as const).map((p) => (
+            {(["bars", "circular", "wave", "pulse"] as const).map((p) => (
               <label
                 key={p}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${preset === p ? "border-[#212529] bg-[#212529] text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"}`}
               >
                 <input type="radio" name="preset" checked={preset === p} onChange={() => setPreset(p)} className="sr-only" />
-                {p === "bars" ? "Bars" : p === "circular" ? "Circular" : p === "wave" ? "Wave" : p === "spectrum" ? "Spectrum" : "Pulse"}
+                {p === "bars" ? "Bars" : p === "circular" ? "Circular" : p === "wave" ? "Wave" : "Pulse"}
               </label>
             ))}
             <select value={color} onChange={(e) => setColor(e.target.value)} className="rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs">
@@ -500,8 +528,7 @@ export function UploadCard() {
             {preset === "bars" && "Classic NCS bars at bottom"}
             {preset === "circular" && "360-bar ring around artwork (canvas)"}
             {preset === "wave" && "Smooth line waveform"}
-            {preset === "spectrum" && "Frequency spectrum bars"}
-            {preset === "pulse" && "Pulsing glow + orbiting dots"}
+            {preset === "pulse" && "Equalizer ring + glowing core + orbiting trails"}
           </div>
         </div>
 

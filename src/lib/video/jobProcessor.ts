@@ -178,7 +178,7 @@ export async function processVideoJob(jobId: string) {
       audioPath: audioTmp,
       artworkPath: artworkTmp,
       title: job.input.title,
-      artist: job.input.artist,
+      artist: "",
       preset: job.input.preset,
       color: job.input.color,
       outputPath,

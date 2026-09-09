@@ -1,0 +1,128 @@
+1
+00:00:00,000 --> 00:00:08,000
+Welcome to this demonstration of Karhari Tube for
+Google OAuth verification. We will begin from a
+signed-out state.
+
+2
+00:00:08,000 --> 00:00:24,000
+Karhari Tube allows creators, musicians, and
+podcasters to convert audio tracks into branded
+videos and publish them directly to YouTube.
+
+3
+00:00:25,000 --> 00:00:35,000
+Here on our About page, we explain the service
+architecture, company information, and our dedicated
+tools for creators.
+
+4
+00:00:36,000 --> 00:00:42,000
+Our Terms of Service outline platform compliance,
+user ownership of content, and adherence to YouTube
+API Services Terms of Service.
+
+5
+00:00:43,000 --> 00:00:54,000
+Our Privacy Policy details how user data and OAuth
+tokens are stored securely using AES-256 encryption,
+strictly used for requested video publishing, and
+never sold or shared.
+
+6
+00:00:55,000 --> 00:01:01,000
+Now, we initiate the sign-in flow by clicking
+Continue with Google.
+
+7
+00:01:02,000 --> 00:01:13,000
+Notice in the address bar that our registered OAuth
+Client ID is clearly visible. We select our Google
+account to proceed.
+
+8
+00:01:14,000 --> 00:01:25,000
+Proceeding through the consent screen to sign in to
+Karhari Tube.
+
+9
+00:01:26,000 --> 00:01:43,000
+Here is the Google OAuth consent screen. Karhari
+Tube requests access to manage YouTube videos, view
+the YouTube account, and manage account uploads.
+These permissions are strictly required to upload
+generated videos directly to the user's YouTube
+channel on their behalf.
+
+10
+00:01:44,000 --> 00:01:59,000
+Once authenticated, the user is directed to the
+creation dashboard. First, we select an audio file
+to upload.
+
+11
+00:01:59,000 --> 00:02:13,000
+Next, we select a background artwork image for the
+video.
+
+12
+00:02:14,000 --> 00:02:29,000
+We set the title, artist name, choose a customized
+audio wave visualizer, confirm our connected YouTube
+account destination, and enter the video
+description.
+
+13
+00:02:30,000 --> 00:03:02,000
+The assets are uploaded securely to our processing
+queue.
+
+14
+00:03:03,000 --> 00:03:36,000
+We click Create Video. The backend starts
+downloading assets and rendering the audio-reactive
+visualizer video.
+
+15
+00:03:37,000 --> 00:05:01,000
+The video generation pipeline combines the
+high-quality audio track with the background artwork
+and synchronized visualizer.
+
+16
+00:05:02,000 --> 00:05:35,000
+With the video rendered, Karhari Tube now uses the
+YouTube Data API youtube dot upload scope to publish
+the video directly to the user's connected YouTube
+channel.
+
+17
+00:05:36,000 --> 00:05:43,000
+Upload is complete. We click Open job to inspect the
+finished task.
+
+18
+00:05:44,000 --> 00:05:57,000
+On the job details page, we can preview the
+generated video and see the delivery confirmation to
+YouTube with the video link.
+
+19
+00:05:58,000 --> 00:06:24,000
+Opening the YouTube link verifies that the video was
+successfully created and uploaded to the user's
+channel.
+
+20
+00:06:25,000 --> 00:06:50,000
+The video has completed YouTube processing. We play
+the video, demonstrating seamless playback of the
+audio, artwork, and synchronized frequency
+visualizer on YouTube.
+
+21
+00:06:51,000 --> 00:07:05,000
+Finally, returning to the dashboard jobs list shows
+the complete upload log and status. This concludes
+the demonstration.
+

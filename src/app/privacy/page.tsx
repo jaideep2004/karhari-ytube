@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   },
 };
 
-const updated = "September 2, 2026";
+const updated = "September 9, 2026";
 
 function TocLink({ n, t }: { n: string; t: string }) {
   return (
@@ -125,6 +125,49 @@ export default function PrivacyPage() {
                 You can revoke at any time:{" "}
                 <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Permissions</a> and{" "}
                 <a href="https://www.facebook.com/settings?tab=business_tools" target="_blank" rel="noopener noreferrer">Facebook Business Integrations</a> — revoking immediately stops future uploads.
+              </p>
+
+              <h4 className="mt-6 text-[15px] font-semibold">5.1 How we share Google user data</h4>
+              <p>
+                <strong>We do not sell, share, transfer, or disclose Google user data</strong> to third parties for
+                advertising, marketing, or any unrelated purpose. We only transfer Google user data as strictly
+                necessary to operate Karhari Tube as you directed:
+              </p>
+              <ul className="list-disc pl-5">
+                <li>
+                  <strong>To Google itself</strong> – via the YouTube Data API (<code>googleapis.com</code>) to list your
+                  channels (<code>youtube/v3/channels?mine=true</code>) and to upload the video you created (
+                  <code>youtube.videos.insert</code> resumable upload). This happens only when you click{" "}
+                  <strong>Create Video</strong> and select a YouTube destination.
+                </li>
+                <li>
+                  <strong>To our service providers acting as data processors under contract</strong> – MongoDB Atlas
+                  (encrypted storage of your OAuth tokens with AES-256-GCM), Cloudflare R2 (temporary storage of{" "}
+                  <code>social-videos/&lt;jobId&gt;.mp4</code>), and Vercel/Render (app hosting). They may not access or use
+                  your Google data for their own purposes and are bound by confidentiality and, where required, Standard
+                  Contractual Clauses (SCCs).
+                </li>
+                <li>
+                  <strong>As required by law or with your explicit consent</strong> – if we must comply with a legal
+                  obligation or you give us permission to do so.
+                </li>
+              </ul>
+              <p>
+                We <strong>never</strong> allow humans at Karhari Media to read your Google data, we never use it for ads
+                or personalization, and we never use it to train AI models. Our use and transfer of information received
+                from Google APIs complies with the{" "}
+                <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">
+                  Google API Services User Data Policy
+                </a>
+                , including the{" "}
+                <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" target="_blank" rel="noopener noreferrer">
+                  Limited Use requirements
+                </a>
+                . You can revoke access at any time at{" "}
+                <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">
+                  Google Permissions
+                </a>{" "}
+                — revocation immediately deletes/disables your tokens on our side (see §6).
               </p>
 
               <h3 id="s6" className="mt-8 scroll-mt-24 text-[18px]">6. Retention & deletion</h3>
