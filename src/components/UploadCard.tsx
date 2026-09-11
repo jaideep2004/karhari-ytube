@@ -39,6 +39,8 @@ export function UploadCard() {
   const [visibility, setVisibility] = useState<"public" | "unlisted" | "private">("public");
   const [scheduleAt, setScheduleAt] = useState("");
   const [description, setDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   const audioInputRef = useRef<HTMLInputElement>(null);
   const artworkInputRef = useRef<HTMLInputElement>(null);
@@ -169,6 +171,62 @@ export function UploadCard() {
     if (f) uploadArtwork(f);
   };
 
+  // ── Tags helpers (YouTube Studio style) ──────────────────────────────
+  const tagsChars = tags.join(",").length;
+  const tagsLimitChars = 500;
+  const tagsLimitCount = 15;
+  const canAddMoreTags = tags.length < tagsLimitCount && tagsChars < tagsLimitChars;
+  const addTag = useCallback((raw: string) => {
+    const t = raw.trim().replace(/\s+/g, " ").slice(0, 30);
+    if (!t) return false;
+    let didAdd = false;
+    setTags((prev) => {
+      if (prev.includes(t)) return prev;
+      if (prev.length >= tagsLimitCount) return prev;
+      const prevChars = prev.join(",").length;
+      const nextChars = prev.length ? prevChars + 1 + t.length : t.length;
+      if (nextChars > tagsLimitChars) return prev;
+      didAdd = true;
+      return [...prev, t];
+    });
+    // note: state update is async; return heuristic based on checks above
+    if (tags.includes(t) || tags.length >= tagsLimitCount) return false;
+    const nextCharsHeur = tags.length ? tags.join(",").length + 1 + t.length : t.length;
+    if (nextCharsHeur > tagsLimitChars) return false;
+    return true;
+  }, [tags]);
+  const removeTag = (idx: number) => setTags((prev) => prev.filter((_, i) => i !== idx));
+  const commitTagInput = useCallback(() => {
+    const raw = tagInput.trim();
+    if (!raw) return;
+    const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length === 0) return;
+    // build next list in one go to avoid stale closures when adding many at once
+    setTags((prev) => {
+      let next = [...prev];
+      let nextChars = next.join(",").length;
+      for (const pRaw of parts) {
+        const p = pRaw.replace(/\s+/g, " ").slice(0, 30);
+        if (!p || next.includes(p)) continue;
+        if (next.length >= tagsLimitCount) break;
+        const inc = next.length ? 1 + p.length : p.length;
+        if (nextChars + inc > tagsLimitChars) break;
+        next.push(p);
+        nextChars += inc;
+      }
+      return next.length === prev.length ? prev : next;
+    });
+    // clear input if at least one would have been added; keep only if completely rejected as duplicate/limit single
+    const wouldAdd = parts.some((p) => {
+      const pp = p.replace(/\s+/g, " ").slice(0, 30);
+      if (!pp || tags.includes(pp)) return false;
+      if (tags.length >= tagsLimitCount) return false;
+      const nc = tags.length ? tags.join(",").length + 1 + pp.length : pp.length;
+      return nc <= tagsLimitChars;
+    });
+    if (wouldAdd || parts.length > 1) setTagInput("");
+  }, [tagInput, tags]);
+
   const canSubmit = !!audioFile && !!title.trim() && !audioUploading && !artworkUploading;
   const [jobId, setJobId] = useState<string | null>(null);
   const [jobPhase, setJobPhase] = useState<string | null>(null);
@@ -236,6 +294,7 @@ export function UploadCard() {
           visibility,
           scheduleAt: scheduleAt || null,
           description,
+          tags: tags.length ? tags : null,
           destinations,
         }),
       });
@@ -495,10 +554,138 @@ export function UploadCard() {
           )}
         </div>
 
-        {/* Title */}
-        <div>
-          <label className="text-sm font-medium">Title *</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="My Song" className="mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-zinc-300" />
+        {/* ── Video details: Title + Description + Tags (YT Studio grouping for SEO) ── */}
+        <div className="rounded-xl border border-zinc-200 bg-zinc-50/60 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm font-semibold">③ Video details</div>
+            <span className="text-[11px] text-zinc-500">Title + description + tags — like YouTube Studio · helps search & SEO</span>
+          </div>
+
+          {/* Title — with counter like YT Studio */}
+          <div className="mt-3">
+            <label className="flex items-center justify-between text-sm font-medium">
+              <span>Title *</span>
+              <span className={`text-[11px] font-normal ${title.length > 100 ? "text-red-600" : "text-zinc-500"}`}>{title.length}/100</span>
+            </label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value.slice(0, 100))}
+              placeholder="My Song — e.g. Karhari Tube | Lofi Chill Mix 2026"
+              maxLength={100}
+              className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
+            />
+            <div className="mt-1 text-[11px] text-zinc-500">Used as YouTube/Facebook video title. Clear titles rank better — add artist or mood once.</div>
+          </div>
+
+          {/* Description */}
+          <div className="mt-4">
+            <label className="flex items-center justify-between text-sm font-medium">
+              <span>Description</span>
+              <span className="text-[11px] font-normal text-zinc-500">{description.length}/5000</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value.slice(0, 5000))}
+              rows={4}
+              maxLength={5000}
+              placeholder="Add description for YouTube/Facebook — story, credits, links, hashtags…&#10;Example: Produced by Karhari Media. Follow for more lofi & Hindi covers."
+              className="mt-1 w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
+            />
+            <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-500">
+              <span>First 2 lines show in search & above the fold.</span>
+              <span>{description.length ? `${Math.max(0, 5000 - description.length)} left` : ""}</span>
+            </div>
+          </div>
+
+          {/* Tags — YouTube Studio style chips */}
+          <div className="mt-4">
+            <label className="flex items-center justify-between text-sm font-medium">
+              <span className="flex items-center gap-1.5">Tags <span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-semibold tracking-widest text-zinc-500 ring-1 ring-zinc-200">SEO</span></span>
+              <span className={`text-[11px] font-normal ${tagsChars > tagsLimitChars || tags.length > tagsLimitCount ? "text-red-600" : "text-zinc-500"}`}>
+                {tags.length}/{tagsLimitCount} · {tagsChars}/{tagsLimitChars} chars
+              </span>
+            </label>
+
+            {/* chip list + input in one bordered box */}
+            <div
+              className={`mt-1 flex min-h-[44px] flex-wrap items-center gap-1.5 rounded-lg border bg-white px-2 py-2 text-sm focus-within:border-zinc-400 focus-within:ring-1 focus-within:ring-zinc-200 ${!canAddMoreTags && tagInput ? "border-amber-300 bg-amber-50/40" : "border-zinc-300"}`}
+              onClick={() => document.getElementById("kt-tag-input")?.focus()}
+            >
+              {tags.map((t, i) => (
+                <span key={`${t}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-[#212529] px-2.5 py-1 text-xs font-medium text-white">
+                  {t}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${t}`}
+                    onClick={() => removeTag(i)}
+                    className="ml-0.5 rounded-full p-0.5 hover:bg-white/20"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                  </button>
+                </span>
+              ))}
+              <input
+                id="kt-tag-input"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+                    e.preventDefault();
+                    commitTagInput();
+                  } else if (e.key === "Backspace" && !tagInput && tags.length) {
+                    e.preventDefault();
+                    removeTag(tags.length - 1);
+                  }
+                }}
+                onBlur={() => { if (tagInput.trim()) commitTagInput(); }}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData("text");
+                  if (pasted.includes(",")) {
+                    e.preventDefault();
+                    const parts = pasted.split(",").map((s) => s.trim()).filter(Boolean);
+                    let added = 0;
+                    for (const p of parts) if (addTag(p)) added++;
+                    if (!added && parts.length) setTagInput(pasted);
+                  }
+                }}
+                placeholder={tags.length === 0 ? "Add tags — e.g. lofi, Hindi song, Karhari Media (press Enter or ,)" : canAddMoreTags ? "Add another tag…" : "Limit reached"}
+                disabled={!canAddMoreTags && !tagInput}
+                maxLength={30}
+                className="min-w-[160px] flex-1 bg-transparent px-1 py-1 text-sm outline-none placeholder:text-zinc-400 disabled:opacity-60"
+              />
+            </div>
+
+            <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] leading-4">
+              <span className="text-zinc-500">
+                Like in <span className="font-medium text-zinc-700">YouTube Studio → Tags</span>: helps search & recommendations. Press <span className="rounded bg-white px-1 py-0.5 font-medium ring-1 ring-zinc-200">Enter</span> or <span className="rounded bg-white px-1 py-0.5 font-medium ring-1 ring-zinc-200">,</span> to add. Each ≤30 chars.
+              </span>
+              {tags.length > 0 && (
+                <button type="button" onClick={() => setTags([])} className="shrink-0 text-zinc-500 underline hover:text-black">Clear all</button>
+              )}
+            </div>
+
+            {!canAddMoreTags && (
+              <div className="mt-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-4 text-amber-900">
+                YouTube allows up to <strong>15 tags / 500 chars</strong>. Remove a tag to add another.
+              </div>
+            )}
+
+            {tags.length === 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <span className="text-[11px] text-zinc-500">Try:</span>
+                {["lofi", "Hindi cover", "Karhari Media", "chill mix", "audio to video"].map((sug) => (
+                  <button
+                    key={sug}
+                    type="button"
+                    onClick={() => addTag(sug)}
+                    className="rounded-full border border-dashed border-zinc-300 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                  >
+                    + {sug}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Visualizer */}
@@ -617,17 +804,7 @@ export function UploadCard() {
           </div>
         </div>
 
-        {/* Description / Visibility */}
-        <div>
-          <label className="text-sm font-medium">Description (optional)</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="Add description for YouTube/Facebook..."
-            className="mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-zinc-300"
-          />
-        </div>
+        {/* Visibility & Schedule — kept separate but close to video details for publishing */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Visibility</label>

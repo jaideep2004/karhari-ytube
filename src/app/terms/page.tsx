@@ -38,6 +38,7 @@ export default function TermsPage() {
           </h1>
           <p className="mt-3 text-sm text-zinc-500">
             Last updated: <span className="font-medium text-[#212529]">{updated}</span> • By using Karhari Tube you agree to these terms. If you do not agree, do not use the service. Contact:{" "}
+            <a href="mailto:support@karharimedia.com" className="underline hover:text-[#212529]">support@karharimedia.com</a> ·{" "}
             <a href="mailto:legal@karharimedia.com" className="underline hover:text-[#212529]">legal@karharimedia.com</a>
           </p>
           <p className="mt-5 rounded-xl border border-zinc-200 bg-white p-4 text-[13.5px] leading-6 text-zinc-600">
@@ -67,7 +68,8 @@ export default function TermsPage() {
                 <TocLink n="12" t="General & contact" />
               </nav>
               <div className="mt-5 rounded-xl bg-[#f8f9fa] p-3 text-xs leading-5 text-zinc-600 ring-1 ring-zinc-200">
-                Also see <Link href="/privacy" className="font-medium underline">Privacy Policy</Link> for how we handle your data.
+                Also see <Link href="/privacy" className="font-medium underline">Privacy Policy</Link> for how we handle your data.<br />
+                Support: <a href="mailto:support@karharimedia.com" className="font-medium underline">support@karharimedia.com</a>
               </div>
             </div>
           </aside>
@@ -153,9 +155,9 @@ export default function TermsPage() {
                 These terms are governed by the laws of India, with courts at the operator’s principal place of business having exclusive jurisdiction, without regard to conflict-of-laws rules. If any provision is found unenforceable, the rest remains in effect. We may update these terms by posting a new version here and updating the “Last updated” date; material changes will be highlighted on the homepage or by email. Continued use after changes means you accept the updated terms.
               </p>
               <p>
-                Questions or notices: <a href="mailto:legal@karharimedia.com">legal@karharimedia.com</a> or{" "}
-                <Link href="/contact">Contact us</Link>. For privacy, see <Link href="/privacy">Privacy Policy</Link>. For data deletion or account removal, email{" "}
-                <a href="mailto:privacy@karharimedia.com">privacy@karharimedia.com</a>.
+                Questions or notices: <a href="mailto:support@karharimedia.com">support@karharimedia.com</a> ·{" "}
+                <a href="mailto:legal@karharimedia.com">legal@karharimedia.com</a> or <Link href="/contact">Contact us</Link>. For privacy, see <Link href="/privacy">Privacy Policy</Link>. For data deletion or account removal, email{" "}
+                <a href="mailto:support@karharimedia.com">support@karharimedia.com</a>.
               </p>
             </div>
           </article>

@@ -32,7 +32,10 @@ export function Footer() {
           </div>
           <div className="flex flex-col items-start gap-1 md:items-end">
             <div className="text-[14px] text-zinc-500">
-              &copy; {new Date().getFullYear()} Karhari Media
+              &copy; {new Date().getFullYear()} Karhari Media ·{" "}
+              <a href="mailto:support@karharimedia.com" className="underline hover:text-black">
+                support@karharimedia.com
+              </a>
             </div>
             <img
               id="developedByYouTube"

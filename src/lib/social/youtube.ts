@@ -39,10 +39,15 @@ async function initiateUpload(
   title: string,
   description: string,
   visibility: string,
-  scheduleAt?: string
+  scheduleAt?: string,
+  tags?: string[]
 ): Promise<string> {
-  const metadata = {
-    snippet: { title, description },
+  const metadata: Record<string, unknown> = {
+    snippet: {
+      title,
+      description,
+      ...(tags && tags.length ? { tags } : {}),
+    },
     status: {
       privacyStatus: visibility,
       selfDeclaredMadeForKids: false,
@@ -202,20 +207,21 @@ export async function uploadToYoutube(opts: {
   videoPath: string;
   title: string;
   description?: string;
+  tags?: string[];
   accessToken: string;
   visibility?: string;
   scheduleAt?: string;
   onProgress?: (pct: number, bytes?: number, total?: number) => void;
   signal?: AbortSignal;
 }): Promise<{ videoId: string; videoUrl: string }> {
-  const { videoPath, title, description = "", accessToken, visibility = "public", scheduleAt, onProgress, signal } = opts;
+  const { videoPath, title, description = "", tags, accessToken, visibility = "public", scheduleAt, onProgress, signal } = opts;
   const stat = await fsPromises.stat(videoPath);
   const fileSize = stat.size;
   const TAG = "[YouTube]";
   const CHUNK_SIZE = 5 * 1024 * 1024;
-  console.log(`${TAG} Starting chunked upload of ${fileSize} bytes`);
+  console.log(`${TAG} Starting chunked upload of ${fileSize} bytes tagCount=${tags?.length ?? 0}`);
 
-  const uploadUrlStr = await initiateUpload(accessToken, fileSize, title.slice(0, 100), description.slice(0, 5000), visibility, scheduleAt);
+  const uploadUrlStr = await initiateUpload(accessToken, fileSize, title.slice(0, 100), description.slice(0, 5000), visibility, scheduleAt, tags?.slice(0, 15));
   const uploadUrl = new URL(uploadUrlStr);
   console.log(`${TAG} Initiation OK`);
 

@@ -2,6 +2,13 @@ export default function HowItWorksPage() {
   return (
     <div className="mx-auto max-w-[720px] px-4 py-10 sm:px-6">
       <h1 className="text-2xl font-semibold">How it works</h1>
+      <p className="mt-2 text-sm text-zinc-600">
+        Need help? Contact us at{" "}
+        <a href="mailto:support@karharimedia.com" className="font-medium underline">
+          support@karharimedia.com
+        </a>
+        .
+      </p>
       <ol className="mt-6 space-y-6 text-sm leading-7 text-zinc-700">
         <li><span className="font-semibold text-black">1. Visit &amp; sign in</span> — Continue with Google to enable YouTube or with Facebook to enable Pages. Connect the other provider in Settings → Connections to enable dual upload.</li>
         <li><span className="font-semibold text-black">2. Upload audio + thumbnail</span> — MP3/WAV/FLAC ≤200 MB + JPG/PNG/WEBP ≤15 MB. We upload to R2 (audio/&lt;uuid&gt;), probe duration, and keep a thumbnail preview. No thumbnail? We render a gradient with your title.</li>
@@ -13,6 +20,7 @@ export default function HowItWorksPage() {
       <div className="mt-8 rounded-xl border bg-white p-6 text-sm leading-7 text-zinc-600">
         <div className="font-medium text-black">For admins</div>
         <div>See /admin for visits (analyticsEvents), users, and per-user uploads. Grant admin by setting ADMIN_EMAILS or role=admin in DB. Ads (AdSlot 336×280, min-height 280 to avoid CLS) appear only on public pages (/, /how-it-works, /faq) with lazy afterInteractive loading.</div>
+        <div className="mt-3 text-xs">Support: <a href="mailto:support@karharimedia.com" className="underline">support@karharimedia.com</a></div>
       </div>
     </div>
   );

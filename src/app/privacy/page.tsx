@@ -38,8 +38,8 @@ export default function PrivacyPage() {
           </h1>
           <p className="mt-3 text-sm text-zinc-500">
             Last updated: <span className="font-medium text-[#212529]">{updated}</span> • Effective on publish • Contact:{" "}
-            <a href="mailto:privacy@karharimedia.com" className="underline hover:text-[#212529]">
-              privacy@karharimedia.com
+            <a href="mailto:support@karharimedia.com" className="underline hover:text-[#212529]">
+              support@karharimedia.com
             </a>
           </p>
           <p className="mt-5 rounded-xl border border-zinc-200 bg-white p-4 text-[13.5px] leading-6 text-zinc-600">
@@ -73,7 +73,11 @@ export default function PrivacyPage() {
                 <TocLink n="10" t="Changes & contact" />
               </nav>
               <div className="mt-5 rounded-xl bg-[#f8f9fa] p-3 text-xs leading-5 text-zinc-600 ring-1 ring-zinc-200">
-                Questions? <Link href="/contact" className="font-medium underline">Contact us</Link> or see{" "}
+                Questions? Email{" "}
+                <a href="mailto:support@karharimedia.com" className="font-medium underline">
+                  support@karharimedia.com
+                </a>{" "}
+                or <Link href="/contact" className="font-medium underline">Contact form</Link> · See{" "}
                 <Link href="/terms" className="underline">Terms</Link>.
               </div>
             </div>
@@ -175,7 +179,7 @@ export default function PrivacyPage() {
                 <li>Source audio/artwork: removed from temp after processing; R2 copy kept ~24h for retry, then purged.</li>
                 <li>Generated video: cached at <code>social-videos/&lt;jobId&gt;.mp4</code> for fast re-upload; deleted on your request or after ~30 days.</li>
                 <li>Tokens: deleted when you disconnect the provider in Settings → Connections or delete your account.</li>
-                <li>Account deletion: email <a href="mailto:privacy@karharimedia.com">privacy@karharimedia.com</a> — we erase PII within 30 days, keeping only anonymized aggregates (counts) where needed for legal/financial records.</li>
+                <li>Account deletion: email <a href="mailto:support@karharimedia.com">support@karharimedia.com</a> — we erase PII within 30 days, keeping only anonymized aggregates (counts) where needed for legal/financial records.</li>
               </ul>
 
               <h3 id="s7" className="mt-8 scroll-mt-24 text-[18px]">7. Security</h3>
@@ -188,7 +192,7 @@ export default function PrivacyPage() {
               <p>
                 Depending on your region you may have rights to access, correct, delete, export, object to or restrict
                 processing, and withdraw consent. To exercise them, email{" "}
-                <a href="mailto:privacy@karharimedia.com">privacy@karharimedia.com</a>. You can also export or delete jobs
+                <a href="mailto:support@karharimedia.com">support@karharimedia.com</a>. You can also export or delete jobs
                 from your dashboard. For EEA/UK you may lodge a complaint with your supervisory authority.
               </p>
 
@@ -202,8 +206,8 @@ export default function PrivacyPage() {
               <h3 id="s10" className="mt-8 scroll-mt-24 text-[18px]">10. Changes & contact</h3>
               <p>
                 We’ll post updates here and change the “Last updated” date above. Material changes will be highlighted on
-                the homepage or by email. Questions: <Link href="/contact">Contact us</Link> or{" "}
-                <a href="mailto:privacy@karharimedia.com">privacy@karharimedia.com</a>. Related:{" "}
+                the homepage or by email. Questions: email{" "}
+                <a href="mailto:support@karharimedia.com">support@karharimedia.com</a> or <Link href="/contact">Contact us</Link>. Related:{" "}
                 <Link href="/terms">Terms & Conditions</Link>.
               </p>
             </div>

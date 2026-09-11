@@ -231,6 +231,7 @@ export async function processVideoJob(jobId: string) {
               videoPath: result.outputPath,
               title: job.input.title,
               description: job.input.description || `${job.input.title} — ${job.input.artist || ""}`.trim(),
+              tags: (job.input as unknown as { tags?: string[] }).tags || undefined,
               accessToken,
               visibility: (job.input.visibility as string) || "public",
               scheduleAt: job.input.scheduleAt || undefined,

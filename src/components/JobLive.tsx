@@ -7,7 +7,7 @@ type Dest = { platform: string; channelId?: string; pageId?: string; externalId?
 type Job = {
   _id: string;
   status: string;
-  input: { title: string; artist: string; preset: string; color?: string; audioR2Key: string; artworkR2Key?: string | null; visibility?: string; description?: string | null };
+  input: { title: string; artist: string; preset: string; color?: string; audioR2Key: string; artworkR2Key?: string | null; visibility?: string; description?: string | null; tags?: string[] | null };
   output?: { r2Url?: string; r2VideoKey?: string; duration?: number; fileSize?: number };
   progress: { phase: string; pct: number };
   error?: string | null;
@@ -93,6 +93,13 @@ export function JobLive({ jobId, initialJob }: { jobId: string; initialJob: Job 
         <div className="font-medium">{job.input.title} — {job.input.artist || "—"}</div>
         <div className="text-xs text-zinc-600">Preset: {job.input.preset}/{job.input.color} • Visibility: {job.input.visibility || "public"} • Audio: {job.input.audioR2Key} {job.input.artworkR2Key ? `• Art: ${job.input.artworkR2Key}` : "• No artwork (gradient)"}</div>
         {job.input.description && <div className="mt-2 whitespace-pre-wrap text-xs text-zinc-700">Desc: {job.input.description}</div>}
+        {job.input.tags && job.input.tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {job.input.tags.map((t, i) => (
+              <span key={i} className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700 ring-1 ring-zinc-200">{t}</span>
+            ))}
+          </div>
+        )}
         <div className="mt-2 text-xs text-zinc-500">Created {new Date(job.createdAt).toLocaleString()}</div>
       </div>
     </div>

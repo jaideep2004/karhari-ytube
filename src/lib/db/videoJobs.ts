@@ -19,6 +19,7 @@ export type VideoJobDoc = {
     visibility?: "public" | "unlisted" | "private";
     scheduleAt?: string | null;
     description?: string | null;
+    tags?: string[] | null;
   };
   output?: {
     r2VideoKey?: string;

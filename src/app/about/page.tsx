@@ -60,6 +60,12 @@ export default function AboutPage() {
             loved product — <span className="font-medium text-[#212529]">Karhari Tube</span> — turns
             any audio file into a video for YouTube and Facebook in seconds.
           </p>
+          <p className="mt-3 text-sm text-zinc-500">
+            Support:{" "}
+            <a href="mailto:support@karharimedia.com" className="font-medium underline hover:text-[#212529]">
+              support@karharimedia.com
+            </a>
+          </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/"
@@ -230,6 +236,9 @@ export default function AboutPage() {
           </Link>
           <div className="mt-3 text-xs text-neutral-400">
             No credit card required • Works with Google & Facebook
+          </div>
+          <div className="mt-4 text-xs text-neutral-400">
+            Questions? Email <a href="mailto:support@karharimedia.com" className="underline text-white hover:text-neutral-200">support@karharimedia.com</a>
           </div>
         </div>
       </div>

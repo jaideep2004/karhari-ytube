@@ -28,12 +28,7 @@ export default function ContactPage() {
             support@karharimedia.com
           </a>
         </div>
-        <div>
-          <span className="font-medium">Privacy</span> —{" "}
-          <a href="mailto:privacy@karharimedia.com" className="underline">
-            privacy@karharimedia.com
-          </a>
-        </div>
+        <div className="mt-1 text-sm text-zinc-600">For all inquiries — support, privacy, billing and AdSense verification.</div>
         <div className="mt-4 text-xs text-zinc-500">
           Tip: include your job ID (from /dashboard/jobs) when asking about a video.
         </div>

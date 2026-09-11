@@ -1,5 +1,6 @@
 export default function FAQPage() {
   const qa = [
+    { q: "Need help? How do I contact you?", a: "Email support@karharimedia.com — we respond within 1–2 business days. Include your job ID from /dashboard/jobs for faster help." },
     { q: "Is it free? Is there a watermark?", a: "Video generation is free in this MVP. No watermark is added — output is clean 1080p (1920×1080). The only branding is an optional small logo if present in public/file.svg." },
     { q: "What files can I upload?", a: "Audio: MP3, WAV, FLAC, AAC, M4A up to 200 MB. Thumbnail: JPG, PNG, WEBP up to 15 MB. If you skip thumbnail we render a gradient with your title/artist via ffmpeg drawtext (Hindi font detected automatically)." },
     { q: "Bars vs Circular — what's the difference?", a: "Bars: blurred artwork background + showwaves waveform (s=1920×380, mode=cline, rate=25, color cyan etc.) + centered card + drawtext + logo. Circular: 800×800 canvas ring with 360 radial bars, colorkey overlay on BG, then muxed. Both encode libx264 fast crf22, aac 192k, yuv420p." },
@@ -12,6 +13,9 @@ export default function FAQPage() {
   return (
     <div className="mx-auto max-w-[720px] px-4 py-10 sm:px-6">
       <h1 className="text-2xl font-semibold">FAQ</h1>
+      <p className="mt-2 text-sm text-zinc-600">
+        Need help? Contact <a href="mailto:support@karharimedia.com" className="underline font-medium">support@karharimedia.com</a>.
+      </p>
       <div className="mt-6 space-y-6">
         {qa.map((item) => (
           <div key={item.q} className="rounded-xl border bg-white p-6">
@@ -19,6 +23,9 @@ export default function FAQPage() {
             <div className="mt-2 text-sm leading-7 text-zinc-600">{item.a}</div>
           </div>
         ))}
+      </div>
+      <div className="mt-8 rounded-xl border bg-white p-4 text-center text-sm text-zinc-600">
+        Still stuck? Email <a href="mailto:support@karharimedia.com" className="font-medium underline">support@karharimedia.com</a> — we respond within 1–2 business days.
       </div>
     </div>
   );

@@ -132,10 +132,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       const description = (body?.description as string) || job.input.description || `${job.input.title} — ${job.input.artist || ""}`.trim();
       const visibility = (body?.visibility as string) || (job.input.visibility as string) || "public";
       const scheduleAt = (body?.scheduleAt as string) || job.input.scheduleAt || undefined;
+      const rawTags = (body?.tags as unknown) ?? (job.input as unknown as { tags?: string[] }).tags;
+      const tags = Array.isArray(rawTags) ? (rawTags as string[]).map(String).map((s) => s.trim()).filter(Boolean).slice(0, 15) : typeof rawTags === "string" && (rawTags as string).trim() ? String(rawTags).split(",").map((s) => s.trim()).filter(Boolean).slice(0, 15) : undefined;
       const yt = await uploadToYoutube({
         videoPath,
         title,
         description,
+        tags,
         accessToken,
         visibility,
         scheduleAt: scheduleAt || undefined,
