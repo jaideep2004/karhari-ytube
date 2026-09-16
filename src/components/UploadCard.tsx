@@ -22,7 +22,7 @@ export function UploadCard() {
   const [generateFromTitle, setGenerateFromTitle] = useState(false);
 
   const [title, setTitle] = useState("");
-  const [preset, setPreset] = useState<"bars" | "circular" | "wave" | "pulse">("bars");
+  const [preset, setPreset] = useState<"bars" | "wave" | "pulse">("bars");
   const [color, setColor] = useState("cyan");
 
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -350,26 +350,6 @@ export function UploadCard() {
           const height = Math.sin((i / barCount) * Math.PI * 2 + t / 10) * 14 + 18;
           ctx.fillRect(i * (barWidth + 1), 68 - height, barWidth, height);
         }
-      } else if (preset === "circular") {
-        const cx = 60, cy = 34, r = 22;
-        ctx.beginPath();
-        for (let i = 0; i < 24; i++) {
-          const ang = (i / 24) * Math.PI * 2 + t / 60;
-          const h = Math.sin(i * 0.9 + t / 8) * 6 + 8;
-          const x1 = cx + Math.cos(ang) * r;
-          const y1 = cy + Math.sin(ang) * r;
-          const x2 = cx + Math.cos(ang) * (r + h);
-          const y2 = cy + Math.sin(ang) * (r + h);
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-        }
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(cx, cy, r - 4, 0, Math.PI * 2);
-        ctx.strokeStyle = hex + "33";
-        ctx.lineWidth = 1;
-        ctx.stroke();
       } else if (preset === "wave") {
         ctx.beginPath();
         ctx.lineWidth = 1.8;
@@ -692,13 +672,13 @@ export function UploadCard() {
         <div>
           <div className="text-sm font-medium">④ Visualizer</div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-            {(["bars", "circular", "wave", "pulse"] as const).map((p) => (
+            {(["bars", "wave", "pulse"] as const).map((p) => (
               <label
                 key={p}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${preset === p ? "border-[#212529] bg-[#212529] text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"}`}
               >
                 <input type="radio" name="preset" checked={preset === p} onChange={() => setPreset(p)} className="sr-only" />
-                {p === "bars" ? "Bars" : p === "circular" ? "Circular" : p === "wave" ? "Wave" : "Pulse"}
+                {p === "bars" ? "Bars" : p === "wave" ? "Wave" : "Pulse"}
               </label>
             ))}
             <select value={color} onChange={(e) => setColor(e.target.value)} className="rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs">
@@ -713,7 +693,6 @@ export function UploadCard() {
           </div>
           <div className="mt-1 text-[11px] text-zinc-500">
             {preset === "bars" && "Classic NCS bars at bottom"}
-            {preset === "circular" && "360-bar ring around artwork (canvas)"}
             {preset === "wave" && "Smooth line waveform"}
             {preset === "pulse" && "Equalizer ring + glowing core + orbiting trails"}
           </div>

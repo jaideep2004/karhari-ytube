@@ -346,9 +346,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
     if (existsSync(LOGO_PATH) && !LOGO_PATH.toLowerCase().endsWith('.svg')) {
       command.input(LOGO_PATH);
       command.loop();
-      const logoVIdx = input.preset === 'bars'
-        ? (hasArtwork ? 3 : 2)
-        : (hasArtwork ? 2 : 1);
+      // Inputs are: 0=audio, 1=artwork (if present), N=logo. Logo is always
+      // the last input, so its index is 2 with artwork, 1 without.
+      const logoVIdx = hasArtwork ? 2 : 1;
       const lastLabel = filterOutputs[0];
       const sep = filterComplex.endsWith(';') ? '' : ';';
       filterComplex += `${sep}[${logoVIdx}:v]scale=90:-1:flags=lanczos,format=yuva420p[lg];` +
