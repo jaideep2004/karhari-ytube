@@ -376,11 +376,17 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
       .complexFilter(filterComplex, filterOutputs)
       .outputOptions([
         '-c:v libx264',
-        '-preset ultrafast',
-        '-crf 22',
+        // NOTE: ultrafast+crf22 produced ~335 MB for a 4-min song (OOM-killed
+        // the VPS mid-upload and made R2/YouTube uploads crawl). veryfast +
+        // capped bitrate lands the same static-artwork video at ~30-60 MB.
+        '-preset veryfast',
+        '-crf 23',
+        '-maxrate 8M',
+        '-bufsize 16M',
         '-c:a aac',
         '-b:a 192k',
         '-pix_fmt yuv420p',
+        '-movflags +faststart',
       ])
       .duration(audioDuration)
       .on('start', (cmdLine: string) => {
