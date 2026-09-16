@@ -30,6 +30,11 @@ export type VideoJobDoc = {
   progress: { phase: string; pct: number; updatedAt: Date };
   destinations?: { platform: string; channelId?: string; pageId?: string; externalId?: string; videoUrl?: string; status?: string; error?: string }[];
   error?: string | null;
+  // Auto-cleanup: set to now+24h when ALL social destinations deliver.
+  // A daily cron (GET /api/cron/cleanup) then deletes R2 + local media.
+  // The DB record itself is always kept.
+  cleanupAfter?: Date | null;
+  mediaCleaned?: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -96,4 +101,19 @@ export async function ensureVideoJobIndexes() {
   const col = await videoJobsCollection();
   await col.createIndex({ userId: 1, createdAt: -1 });
   await col.createIndex({ status: 1 });
+  await col.createIndex({ status: 1, cleanupAfter: 1 });
+}
+
+/** Jobs whose media is due for deletion (done + all socials delivered + 24h passed). */
+export async function listJobsDueForCleanup(limit = 20) {
+  const col = await videoJobsCollection();
+  return col
+    .find({
+      status: "done",
+      mediaCleaned: { $ne: true },
+      cleanupAfter: { $lte: new Date() },
+    })
+    .sort({ cleanupAfter: 1 })
+    .limit(Math.min(50, Math.max(1, limit)))
+    .toArray();
 }

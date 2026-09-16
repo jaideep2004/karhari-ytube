@@ -288,6 +288,11 @@ export async function processVideoJob(jobId: string) {
     const finalStatus = allFailed ? "failed" : "done";
     const finalError = allFailed ? destResults.map((r) => `${r.platform}: ${r.error}`).join("; ") : undefined;
 
+    // Auto-cleanup: only when EVERY social destination delivered (a failed one
+    // may still need the video for a manual retry via Jobs → Deliver).
+    const allDelivered =
+      hasDestinations && destResults.length > 0 && destResults.every((r) => r.status === "delivered");
+
     await updateVideoJob(job._id, {
       status: finalStatus as never,
       output: {
@@ -299,6 +304,8 @@ export async function processVideoJob(jobId: string) {
       destinations: destResults as never,
       error: finalError || null,
       progress: { phase: finalStatus === "done" ? "done" : "failed", pct: finalStatus === "done" ? 100 : 0, updatedAt: new Date() },
+      cleanupAfter:
+        finalStatus === "done" && allDelivered ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
     } as never);
 
     console.log(`${tag} finished status=${finalStatus} dest=${JSON.stringify(destResults)}`);

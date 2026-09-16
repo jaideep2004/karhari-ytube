@@ -58,6 +58,8 @@ Indexes: `{email:1} unique sparse`, `{ "google.sub":1 } sparse`, `{ "facebook.us
   ],
   progress: { phase: "uploading", pct: 82, bytes: 8400000, total: 10400000, updatedAt: ISODate },
   error: null | "No audio file",
+  cleanupAfter: ISODate | null,  // set to done+24h when ALL socials delivered; cron then deletes media
+  mediaCleaned: true,            // R2 + local audio/artwork/video deleted (DB record kept)
   createdAt: ISODate,
   updatedAt: ISODate
 }
@@ -73,4 +75,4 @@ Indexes: `{type:1, createdAt:-1}`, `{path:1}`
 ## R2 Keys
 - `audio/<userId>/<uuid>.<ext>` — original MP3
 - `artwork/<userId>/<uuid>.<ext>` — thumbnail
-- `social-videos/<jobId>.mp4` — generated video (cache, kept)
+- `social-videos/<jobId>.mp4` — generated video (auto-deleted 24h after all socials delivered, via GET /api/cron/cleanup)
