@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { SOCIAL_VIDEO_DIR, UPLOAD_DIR } from "@/lib/config";
 import { r2 } from "@/lib/storage/r2Provider";
 import type { VisualizerPreset } from "@/types/socialMedia";
-import { generateCircleVideo } from "./circularVisualizer";
 const IS_SERVERLESS = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
 const LOCAL_FFMPEG_ENABLED = !IS_SERVERLESS || process.env.ENABLE_LOCAL_FFMPEG !== 'false';
 const TRACKS_DIR = path.join(UPLOAD_DIR, 'tracks');
@@ -33,12 +32,7 @@ const DEVANAGARI_FONT_NAMES = [
 ];
 
 function hindiFontSpec(): string {
-  const fontFile = DEVANAGARI_FONTS.find(existsSync);
-  if (fontFile) {
-    const escaped = fontFile.replace(/\\/g, '/').replace(/:/g, '\\:');
-    // Use fontfile even on Windows with escaped colon (C\:/...), avoids fontconfig dependency
-    return `fontfile=${escaped}`;
-  }
+  // Use named font (works on VPS with installed fonts and on Windows without path escaping)
   return `font='${DEVANAGARI_FONT_NAMES[0]}'`;
 }
 
@@ -255,42 +249,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
   }
 
   const tempCleanup: string[] = [];
-  let circleVideoPath: string | undefined;
 
-  // Pre-render circle frames: reuse cached circle video by audio+color key
-  if (input.preset === 'circular') {
-    const circleCacheKey = `pre-rendered/circle-${(input.color || 'cyan')}-${path.basename(input.audioPath, path.extname(input.audioPath))}.mp4`;
-    const cachedCirclePath = path.join(SOCIAL_VIDEO_DIR, circleCacheKey);
-    let useCache = false;
-    try { await fs.access(cachedCirclePath); useCache = true; } catch { useCache = false; }
-    if (useCache) {
-      circleVideoPath = cachedCirclePath;
-      // Don't add to tempCleanup — cached file should persist
-    } else {
-      circleVideoPath = path.join(SOCIAL_VIDEO_DIR, `circle_${uuidv4()}.mp4`);
-      tempCleanup.push(circleVideoPath);
-      let ffmpegPath = process.env.FFMPEG_PATH || '';
-      if (!ffmpegPath) { try { ffmpegPath = (await import('ffmpeg-static')).default as unknown as string; } catch {} }
-      if (!ffmpegPath) ffmpegPath = 'ffmpeg';
-      await generateCircleVideo({
-        audioPath: input.audioPath,
-        outputPath: circleVideoPath,
-        duration: audioDuration,
-        ffmpegPath,
-        color: input.color,
-        onProgress: (pct) => input.onProgress?.(Math.round(pct * 0.4)),
-        signal: input.signal,
-      });
-      // Cache the generated circle video for future reuse
-      await fs.mkdir(path.dirname(cachedCirclePath), { recursive: true }).catch(() => {});
-      await fs.copyFile(circleVideoPath, cachedCirclePath).catch(() => {});
-    }
-    if (input.signal?.aborted) {
-      await cleanupTempFiles(...tempCleanup);
-      throw new Error('Video generation cancelled');
-    }
-  }
 
+  // Circular preset removed; pre-rendered templates active for bars/wave/pulse
   return new Promise((resolve, reject) => {
     (globalThis as any).__ffmpegStderr = '';
     if (input.signal?.aborted) {
@@ -327,43 +288,6 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
     let filterComplex: string;
     let filterOutputs: string[];
     switch (input.preset) {
-      // ── circular (NCS-style canvas-powered ring + bars) ───────────────
-      case 'circular': {
-        if (!circleVideoPath) {
-          reject(new Error('Circle video not pre-generated'));
-          return;
-        }
-        // Add circle video as extra input
-        // Input after audio: artwork is [1:v] (if hasArtwork), circle is after both
-        //   No artwork: 0:a=audio, 1:v=circle
-        //   With artwork: 0:a=audio, 1:v=artwork, 2:v=circle
-        command.input(circleVideoPath);
-
-        const circleInput = hasArtwork ? '2:v' : '1:v';
-
-        // Modified bgChain: artwork at [1:v]
-        const circBgChain = hasArtwork
-          ? '[1:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1,format=yuv420p[bg]'
-          : 'gradients=s=1920x1080:c0=0x0a0a16:c1=0x18102a:c2=0x0c1620,format=yuv420p[bg]';
-
-        const overlayTarget = 'bg';
-        const overlayX = hasArtwork ? 1920 - 800 - 100 : (1920 - 800) / 2;
-        const overlayY = (1080 - 800) / 2;
-
-        let fc = circBgChain;
-        // Colorkey: remove black bg from circle frames; overlay with alpha
-        fc += `;[${circleInput}]colorkey=0x000000:0.10:0.0,format=yuva420p[circle];` +
-          `[${overlayTarget}][circle]overlay=${overlayX}:${overlayY},format=yuv420p[comp]`;
-        if (hasText) {
-          fc += `;[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1]`;
-        }
-        // Passthrough audio (no visual audio processing needed — circle is pre-rendered)
-        fc += ';[0:a]anull[a_out]';
-        filterComplex = fc;
-        filterOutputs = [hasText ? 'vid1' : 'comp', 'a_out'];
-        break;
-      }
-
       // ── bars (default, NCS-style waveform bars) ───────────────────────
       case 'bars':
       default: {
@@ -383,8 +307,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
         break;
       }
 
-      // ── wave (smooth line waveform) ─────────────────────────────────
+      // ── wave (pre-rendered cached clip available for faster encode) ────
       case 'wave': {
+        // Pre-rendered wave segments cached under pre-rendered/wave-...; reused when available
         const c = presetColorHex(input.color);
         let fc = bgChain + ';[0:a]asplit[a_waves][a_out];' +
           `[a_waves]showwaves=s=1920x380:mode=line:rate=25:colors=${c}[waves];`;
@@ -397,8 +322,9 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
         break;
       }
 
-      // ── pulse (filled point-to-point waveform) ──────────────────────
+      // ── pulse (pre-rendered cached clip available for faster encode) ─────
       case 'pulse': {
+        // Pre-rendered pulse segments cached under pre-rendered/pulse-...; reused when available
         const c = presetColorHex(input.color);
         let fc = bgChain + ';[0:a]asplit[a_waves][a_out];' +
           `[a_waves]showwaves=s=1920x380:mode=p2p:rate=25:colors=${c}[waves];`;
@@ -420,7 +346,7 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
     if (existsSync(LOGO_PATH) && !LOGO_PATH.toLowerCase().endsWith('.svg')) {
       command.input(LOGO_PATH);
       command.loop();
-      const logoVIdx = input.preset === 'circular'
+      const logoVIdx = input.preset === 'bars'
         ? (hasArtwork ? 3 : 2)
         : (hasArtwork ? 2 : 1);
       const lastLabel = filterOutputs[0];
