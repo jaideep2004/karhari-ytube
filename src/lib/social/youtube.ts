@@ -5,9 +5,21 @@ import https from "https";
 function httpsRequestPromise(
   url: URL,
   httpsRequest: typeof https.request,
-  opts: { method: string; headers?: Record<string, string>; body?: Buffer }
+  opts: { method: string; headers?: Record<string, string>; body?: Buffer; timeoutMs?: number; signal?: AbortSignal }
 ): Promise<{ statusCode: number; headers: Record<string, string>; body: string }> {
   return new Promise((resolve, reject) => {
+    if (opts.signal?.aborted) {
+      reject(new Error("Upload cancelled"));
+      return;
+    }
+    const timeoutMs = opts.timeoutMs ?? 60_000;
+    let settled = false;
+    const done = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      opts.signal?.removeEventListener("abort", onAbort);
+      fn();
+    };
     const req = httpsRequest(
       {
         hostname: url.hostname,
@@ -19,15 +31,26 @@ function httpsRequestPromise(
         let body = "";
         res.on("data", (c) => (body += typeof c === "string" ? c : c.toString()));
         res.on("end", () =>
-          resolve({
-            statusCode: res.statusCode || 0,
-            headers: res.headers as Record<string, string>,
-            body,
-          })
+          done(() =>
+            resolve({
+              statusCode: res.statusCode || 0,
+              headers: res.headers as Record<string, string>,
+              body,
+            })
+          )
         );
       }
     );
-    req.on("error", reject);
+    const onAbort = () => {
+      req.destroy(new Error("Upload cancelled"));
+    };
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
+    req.on("error", (err) => done(() => reject(err)));
+    // Without this, a stalled VPS→Google socket hangs forever: no error, no
+    // retry, job frozen at uploading:youtube 80% with nothing in the UI.
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error(`YouTube request timed out after ${Math.round(timeoutMs / 1000)}s (no response)`));
+    });
     if (opts.body) req.write(opts.body);
     req.end();
   });
@@ -69,6 +92,9 @@ async function initiateUpload(
             "X-Upload-Content-Length": String(fileSize),
           },
           body: JSON.stringify(metadata),
+          // fetch has no default timeout — without this a stalled connection
+          // hangs initiation forever (job frozen, no error in UI)
+          signal: AbortSignal.timeout(30_000),
         }
       );
       if (res.status === 401) throw new Error("YouTube access token expired or invalid. Reconnect the channel.");
@@ -90,7 +116,8 @@ async function initiateUpload(
 
 async function queryUploadStatus(
   uploadUrl: URL,
-  fileSize?: number
+  fileSize?: number,
+  signal?: AbortSignal
 ): Promise<number> {
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
@@ -102,6 +129,8 @@ async function queryUploadStatus(
       const result = await httpsRequestPromise(uploadUrl, https.request, {
         method: "PUT",
         headers,
+        timeoutMs: 30_000,
+        signal,
       });
       if (result.statusCode === 308) {
         const range = result.headers["range"] || result.headers["Range"];
@@ -149,6 +178,10 @@ async function sendChunkWithRetry(
         method: "PUT",
         headers,
         body: buf,
+        // 5 MB chunk: generous enough for slow uplinks, finite so a dead
+        // socket becomes a retryable error instead of a frozen job
+        timeoutMs: 120_000,
+        signal,
       });
       if (result.statusCode === 308) {
         const range = result.headers["range"] || result.headers["Range"];
@@ -189,7 +222,7 @@ async function sendChunkWithRetry(
         await new Promise((r) => setTimeout(r, attempt * 2000));
         // query server position before retry
         try {
-          const resumeAt = await queryUploadStatus(uploadUrl, fileSize);
+          const resumeAt = await queryUploadStatus(uploadUrl, fileSize, signal);
           if (resumeAt > start) {
             console.log(`[YouTube] server has bytes 0-${resumeAt - 1}, resuming at ${resumeAt}`);
             return { complete: false, resumeAt };
@@ -227,7 +260,7 @@ export async function uploadToYoutube(opts: {
 
   const fd = await fsPromises.open(videoPath, "r");
   try {
-    let uploadedBytes = await queryUploadStatus(uploadUrl, fileSize);
+    let uploadedBytes = await queryUploadStatus(uploadUrl, fileSize, signal);
     console.log(`${TAG} Starting from byte ${uploadedBytes}/${fileSize}`);
     // eslint-disable-next-line no-constant-condition
     while (uploadedBytes < fileSize) {
@@ -273,6 +306,9 @@ export async function refreshYoutubeAccessToken(refreshToken: string): Promise<{
       refresh_token: refreshToken,
       grant_type: "refresh_token",
     }),
+    // token refresh runs after the uploading:youtube progress write — a hang
+    // here looks identical (frozen 80%), so bound it too
+    signal: AbortSignal.timeout(30_000),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`Token refresh failed (${res.status}): ${JSON.stringify(data)}`);
