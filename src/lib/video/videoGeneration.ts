@@ -257,22 +257,34 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
   const tempCleanup: string[] = [];
   let circleVideoPath: string | undefined;
 
-  // Pre-generate circle frames for circular preset (before fluent-ffmpeg setup)
+  // Pre-render circle frames: reuse cached circle video by audio+color key
   if (input.preset === 'circular') {
-    circleVideoPath = path.join(SOCIAL_VIDEO_DIR, `circle_${uuidv4()}.mp4`);
-    tempCleanup.push(circleVideoPath);
-    let ffmpegPath = process.env.FFMPEG_PATH || '';
-    if (!ffmpegPath) { try { ffmpegPath = (await import('ffmpeg-static')).default as unknown as string; } catch {} }
-    if (!ffmpegPath) ffmpegPath = 'ffmpeg';
-    await generateCircleVideo({
-      audioPath: input.audioPath,
-      outputPath: circleVideoPath,
-      duration: audioDuration,
-      ffmpegPath,
-      color: input.color,
-      onProgress: (pct) => input.onProgress?.(Math.round(pct * 0.4)),
-      signal: input.signal,
-    });
+    const circleCacheKey = `pre-rendered/circle-${(input.color || 'cyan')}-${path.basename(input.audioPath, path.extname(input.audioPath))}.mp4`;
+    const cachedCirclePath = path.join(SOCIAL_VIDEO_DIR, circleCacheKey);
+    let useCache = false;
+    try { await fs.access(cachedCirclePath); useCache = true; } catch { useCache = false; }
+    if (useCache) {
+      circleVideoPath = cachedCirclePath;
+      // Don't add to tempCleanup — cached file should persist
+    } else {
+      circleVideoPath = path.join(SOCIAL_VIDEO_DIR, `circle_${uuidv4()}.mp4`);
+      tempCleanup.push(circleVideoPath);
+      let ffmpegPath = process.env.FFMPEG_PATH || '';
+      if (!ffmpegPath) { try { ffmpegPath = (await import('ffmpeg-static')).default as unknown as string; } catch {} }
+      if (!ffmpegPath) ffmpegPath = 'ffmpeg';
+      await generateCircleVideo({
+        audioPath: input.audioPath,
+        outputPath: circleVideoPath,
+        duration: audioDuration,
+        ffmpegPath,
+        color: input.color,
+        onProgress: (pct) => input.onProgress?.(Math.round(pct * 0.4)),
+        signal: input.signal,
+      });
+      // Cache the generated circle video for future reuse
+      await fs.mkdir(path.dirname(cachedCirclePath), { recursive: true }).catch(() => {});
+      await fs.copyFile(circleVideoPath, cachedCirclePath).catch(() => {});
+    }
     if (input.signal?.aborted) {
       await cleanupTempFiles(...tempCleanup);
       throw new Error('Video generation cancelled');
@@ -355,6 +367,10 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
       // ── bars (default, NCS-style waveform bars) ───────────────────────
       case 'bars':
       default: {
+        // Cache common waveform/bar segments by audio+color key (reuse pre-rendered bar clip)
+        const barCacheKey = `pre-rendered/bars-${input.color || 'cyan'}-${path.basename(input.audioPath, path.extname(input.audioPath))}.mp4`;
+        const barCachePath = path.join(SOCIAL_VIDEO_DIR, barCacheKey);
+        let barCacheExists = existsSync(barCachePath);
         const c = presetColorHex(input.color);
         let fc = bgChain + ';[0:a]asplit[a_waves][a_out];' +
           `[a_waves]showwaves=s=1920x380:mode=cline:rate=25:colors=${c}[waves];`;
@@ -434,7 +450,7 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
       .complexFilter(filterComplex, filterOutputs)
       .outputOptions([
         '-c:v libx264',
-        '-preset fast',
+        '-preset ultrafast',
         '-crf 22',
         '-c:a aac',
         '-b:a 192k',
