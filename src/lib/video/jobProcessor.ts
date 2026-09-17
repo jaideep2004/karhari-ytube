@@ -8,6 +8,19 @@ import { getDb } from "@/lib/db/mongo";
 import { decryptToken } from "@/lib/auth/tokenVault";
 import { ObjectId } from "mongodb";
 
+// Live workers, keyed by jobId — lets DELETE stop ffmpeg/uploads mid-run.
+const jobControllers = new Map<string, AbortController>();
+
+/** Signal a running job to stop (ffmpeg SIGKILL + abort chunk loops). Returns false if no live worker (already done, or process restarted). */
+export function abortRunningJob(jobId: string): boolean {
+  const c = jobControllers.get(jobId);
+  if (!c || c.signal.aborted) return false;
+  try {
+    c.abort();
+  } catch {}
+  return true;
+}
+
 async function downloadKeyToTmp(r2Key: string, tmpDir: string): Promise<string> {
   const basename = path.basename(r2Key);
   const tmpPath = path.join(tmpDir, basename);
@@ -149,6 +162,13 @@ export async function processVideoJob(jobId: string) {
   const job = await getVideoJob(jobId);
   if (!job || !job._id) throw new Error("Job not found");
 
+  // Registry so DELETE /api/jobs/[id] can stop a live ffmpeg/upload.
+  // (Survives only in-process — after a pm2 restart there is no live worker,
+  // and the boot-time recovery in jobRecovery.ts handles those orphans.)
+  const controller = new AbortController();
+  jobControllers.set(jobId, controller);
+  const signal = controller.signal;
+
   const tmpDir = path.join(os.tmpdir(), `kt-job-${jobId}`);
   await fs.mkdir(tmpDir, { recursive: true });
   await fs.mkdir(SOCIAL_VIDEO_DIR, { recursive: true });
@@ -183,6 +203,7 @@ export async function processVideoJob(jobId: string) {
       color: job.input.color,
       outputPath,
       hasArtwork: !!artworkTmp,
+      signal,
       onProgress: (pct) => {
         const overall = 30 + Math.round((pct / 100) * 50);
         setJobProgress(job._id!, "generating", overall).catch(() => {});
@@ -235,6 +256,7 @@ export async function processVideoJob(jobId: string) {
               accessToken,
               visibility: (job.input.visibility as string) || "public",
               scheduleAt: job.input.scheduleAt || undefined,
+              signal,
               onProgress: (pct) => {
                 const overall = pctBase + Math.round((pct / 100) * (15 / destinationsInput.length));
                 setJobProgress(job._id!, `uploading:youtube`, Math.min(95, overall)).catch(() => {});
@@ -264,6 +286,7 @@ export async function processVideoJob(jobId: string) {
               description: job.input.description || "",
               pageId,
               pageAccessToken: pageToken,
+              signal,
               onProgress: (pct) => {
                 const overall = pctBase + Math.round((pct / 100) * (15 / destinationsInput.length));
                 setJobProgress(job._id!, `uploading:facebook`, Math.min(95, overall)).catch(() => {});
@@ -323,5 +346,7 @@ export async function processVideoJob(jobId: string) {
         progress: { phase: "failed", pct: 0, updatedAt: new Date() },
       } as never);
     }
+  } finally {
+    jobControllers.delete(jobId);
   }
 }

@@ -2,7 +2,7 @@ import { ObjectId, Db } from "mongodb";
 import { getDb } from "./mongo";
 
 export type VideoJobStatus = "queued" | "downloading" | "generating" | "uploading" | "done" | "failed";
-export type VideoPreset = "bars" | "wave" | "pulse";
+export type VideoPreset = "bars" | "wave";
 export type VideoColor = "cyan" | "green" | "pink" | "purple" | "red" | "white";
 
 export type VideoJobDoc = {
@@ -89,6 +89,12 @@ export async function updateVideoJob(id: string | ObjectId, patch: Partial<Video
   const _id = typeof id === "string" ? new ObjectId(id) : id;
   const now = new Date();
   await col.updateOne({ _id }, { $set: { ...patch, updatedAt: now } });
+}
+
+export async function deleteVideoJob(id: string | ObjectId) {
+  const col = await videoJobsCollection();
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
+  await col.deleteOne({ _id });
 }
 
 export async function setJobProgress(id: string | ObjectId, phase: string, pct: number) {

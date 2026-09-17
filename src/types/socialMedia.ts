@@ -1,4 +1,4 @@
-export type VisualizerPreset = 'bars' | 'wave' | 'pulse';
+export type VisualizerPreset = 'bars' | 'wave';
 export type VisualizerColor = 'cyan' | 'green' | 'pink' | 'purple' | 'red' | 'white';
 export type SocialPlatform = 'youtube' | 'facebook';
 export type AlbumMode = 'individual' | 'album' | 'both';

@@ -28,12 +28,12 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white shadow-xs">
-      <div className="mx-auto flex h-14 max-w-[1140px] items-center justify-between px-4 sm:px-6 xl:px-12">
+      <div className="mx-auto flex h-[65px] max-w-[1140px] items-center justify-between px-4 sm:px-6 xl:px-12">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/images/karhari-media-b1.png"
             alt="Karhari Media Logo"
-            className="h-8 w-auto object-contain"
+            className="h-[60px] w-auto object-contain"
           />
         </Link>
         <nav className="flex items-center gap-4 text-sm">

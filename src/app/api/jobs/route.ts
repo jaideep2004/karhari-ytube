@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     normalizedTags = limited.length ? limited : null;
   }
 
-  const allowed = ["bars","wave","pulse"] as const;
+  const allowed = ["bars","wave"] as const;
   const p = (typeof preset === "string" && (allowed as readonly string[]).includes(preset) ? preset : "bars") as typeof allowed[number];
   const c = typeof color === "string" ? color : "cyan";
   const v = visibility === "unlisted" || visibility === "private" ? visibility : "public";

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { findUserByEmail } from "@/lib/db/users";
 import { listVideoJobs } from "@/lib/db/videoJobs";
+import { JobDeleteButton } from "@/components/JobDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                   <th className="px-4 py-3">Progress</th>
                   <th className="px-4 py-3">Created</th>
                   <th className="px-4 py-3">Deliver</th>
+                  <th className="px-4 py-3"><span className="sr-only">Delete</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -85,6 +87,9 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                       <td className="px-4 py-3 text-xs text-zinc-500">{new Date(j.createdAt).toLocaleString()}</td>
                       <td className="px-4 py-3">
                         {j.status === "done" ? <Link href={`/dashboard/jobs/${id}`} className="rounded-full bg-black px-3 py-1 text-xs font-medium text-white">Upload →</Link> : <Link href={`/dashboard/jobs/${id}`} className="text-xs font-medium underline">Open →</Link>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <JobDeleteButton jobId={id} title={j.input.title} status={j.status} />
                       </td>
                     </tr>
                   );

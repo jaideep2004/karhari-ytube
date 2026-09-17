@@ -43,18 +43,21 @@ export default async function Home() {
         </div>
       </div>
       {/* === TOP HERO / AUTH SECTION === */}
-      <div className="mx-auto max-w-[1140px] px-4 py-8 sm:px-6 md:py-12 xl:px-12">
-        {/* Karhari Media Logo */}
-        <div className="mb-8 flex justify-center md:mb-12">
-          <Link href="/">
-            <img
-              id="karhariLogo"
-              src="/images/karhari-media-b1.png"
-              alt="Karhari Media Logo"
-              className="h-auto max-h-[90px] sm:max-h-[110px] md:max-h-[125px] w-auto max-w-[280px] sm:max-w-[340px] md:max-w-[380px] object-contain"
-            />
-          </Link>
-        </div>
+      {/* authed: no top padding — the upload card carries its own explicit 10px */}
+      <div className={authed ? "mx-auto max-w-[1140px] px-4 pb-8 sm:px-6 md:pb-12 xl:px-12" : "mx-auto max-w-[1140px] px-4 py-8 sm:px-6 md:py-12 xl:px-12"}>
+        {/* Karhari Media Logo — pre-login only (logged-in users already see it in the header) */}
+        {!authed && (
+          <div className="mb-8 flex justify-center md:mb-12">
+            <Link href="/">
+              <img
+                id="karhariLogo"
+                src="/images/karhari-media-b1.png"
+                alt="Karhari Media Logo"
+                className="h-auto max-h-[90px] sm:max-h-[110px] md:max-h-[125px] w-auto max-w-[280px] sm:max-w-[340px] md:max-w-[380px] object-contain"
+              />
+            </Link>
+          </div>
+        )}
 
         {/* If authed, show the upload studio card; otherwise show the pre-login 2-column hero */}
         {authed ? (

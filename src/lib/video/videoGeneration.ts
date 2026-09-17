@@ -251,7 +251,7 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
   const tempCleanup: string[] = [];
 
 
-  // Circular preset removed; pre-rendered templates active for bars/wave/pulse
+  // Circular + pulse presets removed; bars/wave only (unknown values fall through to bars)
   return new Promise((resolve, reject) => {
     (globalThis as any).__ffmpegStderr = '';
     if (input.signal?.aborted) {
@@ -313,21 +313,6 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
         const c = presetColorHex(input.color);
         let fc = bgChain + ';[0:a]asplit[a_waves][a_out];' +
           `[a_waves]showwaves=s=1920x380:mode=line:rate=25:colors=${c}[waves];`;
-        fc += '[bg][waves]overlay=0:1080-380,format=yuv420p[comp];';
-        if (hasText) {
-          fc += `[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1];`;
-        }
-        filterComplex = fc;
-        filterOutputs = [hasText ? 'vid1' : 'comp', 'a_out'];
-        break;
-      }
-
-      // ── pulse (pre-rendered cached clip available for faster encode) ─────
-      case 'pulse': {
-        // Pre-rendered pulse segments cached under pre-rendered/pulse-...; reused when available
-        const c = presetColorHex(input.color);
-        let fc = bgChain + ';[0:a]asplit[a_waves][a_out];' +
-          `[a_waves]showwaves=s=1920x380:mode=p2p:rate=25:colors=${c}[waves];`;
         fc += '[bg][waves]overlay=0:1080-380,format=yuv420p[comp];';
         if (hasText) {
           fc += `[comp]drawtext=text='${escapeDrawtext(titleTxt)}':x=(w-text_w)/2:y=60:fontsize=34:fontcolor=White:shadowy=2:shadowcolor=black@0.7:${FONT_SPEC}[vid1];`;
