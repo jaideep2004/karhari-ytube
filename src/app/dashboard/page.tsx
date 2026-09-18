@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+      {/* <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="rounded-xl border bg-white p-5">
           <div className="text-sm font-semibold">YouTube channels (API test)</div>
           <p className="mt-1 text-xs text-zinc-500">Calls /api/auth/youtube/channels — requires Google linked.</p>
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             Test endpoint →
           </a>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
